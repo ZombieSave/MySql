@@ -11,5 +11,4 @@ ALTER TABLE communities_users ADD FOREIGN KEY communities_users_user_id (user_id
 ALTER TABLE media ADD FOREIGN KEY media_user_id (user_id) REFERENCES users(id)  
 ALTER TABLE media ADD FOREIGN KEY media_media_type_id (media_type_id) REFERENCES users(id)  
 
-ALTER TABLE profiles ADD FOREIGN KEY profiles_user_id (user_id) REFERENCES users(id)
-ALTER TABLE profiles ADD UNIQUE(user_id)
+CREATE INDEX users_f_name_l_name ON users (first_name, last_name)
