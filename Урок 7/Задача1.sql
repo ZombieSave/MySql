@@ -8,3 +8,8 @@ WHERE u.id IN (SELECT u.id FROM users u
 -- b)
 SELECT * FROM users u
 WHERE EXISTS (SELECT 1 FROM orders o WHERE o.user_id = u.id);
+
+
+-- c)
+SELECT DISTINCT u.* FROM users u
+JOIN orders o ON o.user_id = u.id
