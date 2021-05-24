@@ -1,0 +1,9 @@
+USE Kinopoisk;
+
+-- список фильмов в которых участвовал person. отображается на странице детализации участника кинопроизводства справа в виде ссылок
+SELECT CONCAT('https://www.kinopoisk.ru/film/', mp.movie_id) 'Ссылка', 
+       m.name 'Название'
+FROM movies_persons mp 
+JOIN movies m ON m.id = mp.movie_id 
+WHERE mp.person_id = 1;-- id участника
+
