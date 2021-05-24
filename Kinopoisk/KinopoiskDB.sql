@@ -84,7 +84,7 @@ created_at datetime NOT NULL DEFAULT now() comment 'Дата добавления записи',
 updated_at datetime NOT NULL DEFAULT now() comment 'Дата обновления записи'
 );
 
-ALTER TABLE persons ADD INDEX persons_first_last_middle_ix (first_name, middle_name, last_name);
+ALTER TABLE persons ADD INDEX persons_first_last_middle_ix (first_name, last_name);
 
 
 -- movies-persons многие-ко-многим
@@ -159,6 +159,8 @@ avatar blob comment 'картинка',
 created_at datetime NOT NULL DEFAULT now() comment 'Дата добавления записи',
 updated_at datetime NOT NULL DEFAULT now() comment 'Дата обновления записи'
 );
+
+ALTER TABLE users ADD UNIQUE INDEX users_uq (nickname);
 
 
 -- рецензии зрителей на фильм
