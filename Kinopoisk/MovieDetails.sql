@@ -10,7 +10,8 @@ WITH c_movies_persons AS (SELECT mp.person_status_id, mp.movie_id, GROUP_CONCAT(
 	 c_movie_countries AS (SELECT mc.movie_id, GROUP_CONCAT(c.name SEPARATOR ', ') countries FROM movies_countries mc 
 						   JOIN countries c ON c.id = mc.country_id 
 		   				   GROUP BY mc.movie_id)  				   
-SELECT m.name 'Название', 
+SELECT m.rating 'Рейтинг',
+       m.name 'Название', 
        m.original_name 'Оригинальное название', 
        m.production_year 'Год производства',
        m.genre 'Жанр',
@@ -43,5 +44,4 @@ LEFT JOIN c_movies_persons c_ol ON c_ol.movie_id = m.id AND c_ol.person_status_i
 LEFT JOIN c_movies_persons c_cl ON c_cl.movie_id = m.id AND c_cl.person_status_id = 8 -- композитор
 LEFT JOIN c_viewers c_v ON c_v.movie_id = m.id
 LEFT JOIN c_movie_countries c_mc ON c_mc.movie_id = m.id
-LEFT JOIN mpaa_ratings mpaa ON mpaa.id  = m.mpaa_rating_id 
-WHERE m.deleted <> TRUE  
+LEFT JOIN mpaa_ratings mpaa ON mpaa.id  = m.mpaa_rating_id; 

@@ -6,8 +6,10 @@ SELECT u.nickname 'Автор',
        DATE_FORMAT(c.created_at, '%d %M %Y в %H:%i') 'Дата и время написания', 
        c.name 'Заголовок',
        c.body 'Текст',
-       (SELECT COUNT(*) FROM likes l WHERE l.critique_id  = c.id AND l.positive = TRUE) 'Позитивно', 
-       (SELECT COUNT(*) FROM likes l WHERE l.critique_id  = c.id AND l.positive = FALSE) 'Негативно'
+       get_likes_count(c.id, TRUE) 'Полезно', 
+       get_likes_count(c.id, FALSE) 'Нет'
 FROM critiques c
-JOIN users u ON u.id = c.user_id
-WHERE c.movie_id  = 1;
+JOIN users u ON u.id = c.user_id;
+
+
+

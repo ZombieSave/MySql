@@ -15,6 +15,11 @@ DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS countries;
 DROP TABLE IF EXISTS mpaa_ratings;
 DROP TABLE IF EXISTS person_statuses;
+DROP TABLE IF EXISTS audit;
+DROP TRIGGER IF EXISTS t_movies_insert;
+DROP TRIGGER IF EXISTS t_movies_update;
+DROP TRIGGER IF EXISTS t_persons_update;
+DROP TRIGGER IF EXISTS t_persons_update;
 
 -- справочник. данные о странах
 CREATE TABLE countries
@@ -46,7 +51,8 @@ status varchar(64) NOT NULL comment 'актёр, режиссёр, сценарист и др.'
 -- фильмы
 CREATE TABLE movies
 (
-id bigint UNSIGNED AUTO_INCREMENT PRIMARY KEY ,
+id bigint UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+rating decimal(4,2) UNSIGNED CONSTRAINT movies_rating_chk CHECK (rating <= 10) comment 'Рейтинг', 
 name varchar(128) NOT NULL comment 'Наименование фильма',
 original_name varchar(128) NOT NULL comment 'Оригинальное наименование фильма', 
 poster MEDIUMBLOB comment 'Постер', -- в полный размер картинка больше 65 КБ 
@@ -95,9 +101,9 @@ person_id bigint UNSIGNED NOT NULL,
 person_status_id int UNSIGNED NOT NULL
 );
 
-ALTER TABLE movies_persons ADD CONSTRAINT movies_persons_movies_fk FOREIGN KEY (movie_id) REFERENCES movies(id);
-ALTER TABLE movies_persons ADD CONSTRAINT movies_persons_persons_fk FOREIGN KEY (person_id) REFERENCES persons(id);
-ALTER TABLE movies_persons ADD CONSTRAINT movies_persons_person_statuses_fk FOREIGN KEY (person_status_id) REFERENCES person_statuses(id);
+ALTER TABLE movies_persons ADD CONSTRAINT movies_persons_movies_fk FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE;
+ALTER TABLE movies_persons ADD CONSTRAINT movies_persons_persons_fk FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE;
+ALTER TABLE movies_persons ADD CONSTRAINT movies_persons_person_statuses_fk FOREIGN KEY (person_status_id) REFERENCES person_statuses(id) ON DELETE CASCADE;
 ALTER TABLE movies_persons ADD UNIQUE INDEX movies_persons_uq (movie_id, person_id, person_status_id);
 
 
@@ -108,8 +114,8 @@ movie_id bigint UNSIGNED NOT NULL,
 country_id int UNSIGNED NOT NULL
 );
 
-ALTER TABLE movies_countries ADD CONSTRAINT movies_countries_movies_fk FOREIGN KEY (movie_id) REFERENCES movies(id);
-ALTER TABLE movies_countries ADD CONSTRAINT movies_countries_countries_fk FOREIGN KEY (country_id) REFERENCES countries(id);
+ALTER TABLE movies_countries ADD CONSTRAINT movies_countries_movies_fk FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE;
+ALTER TABLE movies_countries ADD CONSTRAINT movies_countries_countries_fk FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE;
 ALTER TABLE movies_countries ADD UNIQUE INDEX movies_countries_uq (movie_id, country_id);
 
 
@@ -123,8 +129,8 @@ created_at datetime NOT NULL DEFAULT now() comment 'Дата добавления записи',
 updated_at datetime NOT NULL DEFAULT now() comment 'Дата обновления записи'
 );
 
-ALTER TABLE viewers_by_countries ADD CONSTRAINT viewers_by_countries_movie_fk FOREIGN KEY (movie_id) REFERENCES movies(id);
-ALTER TABLE viewers_by_countries ADD CONSTRAINT viewers_by_countries_country_fk FOREIGN KEY (country_id) REFERENCES countries(id);
+ALTER TABLE viewers_by_countries ADD CONSTRAINT viewers_by_countries_movie_fk FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE;
+ALTER TABLE viewers_by_countries ADD CONSTRAINT viewers_by_countries_country_fk FOREIGN KEY (country_id) REFERENCES countries(id) ON DELETE CASCADE;
 ALTER TABLE viewers_by_countries ADD UNIQUE INDEX viewers_by_countries_uq (movie_id, country_id);
 
 
@@ -141,8 +147,8 @@ created_at datetime NOT NULL DEFAULT now() comment 'Дата добавления записи',
 updated_at datetime NOT NULL DEFAULT now() comment 'Дата обновления записи'
 );
 
-ALTER TABLE spouses ADD CONSTRAINT spouses_persons_fk FOREIGN KEY (person_id) REFERENCES persons(id);
-ALTER TABLE spouses ADD CONSTRAINT spouses_spouse_persons_fk FOREIGN KEY (spouse_person_id) REFERENCES persons(id);
+ALTER TABLE spouses ADD CONSTRAINT spouses_persons_fk FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE;
+ALTER TABLE spouses ADD CONSTRAINT spouses_spouse_persons_fk FOREIGN KEY (spouse_person_id) REFERENCES persons(id) ON DELETE CASCADE;
 ALTER TABLE spouses ADD UNIQUE INDEX spouses_uq (person_id, spouse_person_id);
 
 
@@ -176,7 +182,8 @@ created_at datetime NOT NULL DEFAULT now() comment 'Дата добавления записи',
 updated_at datetime NOT NULL DEFAULT now() comment 'Дата обновления записи'
 );
 
-ALTER TABLE critiques ADD CONSTRAINT critiques_users_fk FOREIGN KEY (user_id) REFERENCES users(id);
+ALTER TABLE critiques ADD CONSTRAINT critiques_users_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE critiques ADD CONSTRAINT critiques_movies_fk FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE;
 ALTER TABLE critiques ADD UNIQUE INDEX critiques_uq (user_id, movie_id);
 
 -- оценки рецензий
@@ -188,6 +195,107 @@ critique_id bigint UNSIGNED NOT NULL comment 'Рецензия',
 create_at datetime NOT NULL DEFAULT now()
 );
 
-ALTER TABLE likes ADD CONSTRAINT likes_critiques_fk FOREIGN KEY (critique_id) REFERENCES critiques(id);
-ALTER TABLE likes ADD CONSTRAINT likes_users_fk FOREIGN KEY (user_id) REFERENCES users(id);
+ALTER TABLE likes ADD CONSTRAINT likes_critiques_fk FOREIGN KEY (critique_id) REFERENCES critiques(id) ON DELETE CASCADE;
+ALTER TABLE likes ADD CONSTRAINT likes_users_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 ALTER TABLE likes ADD UNIQUE INDEX likes_uq (user_id, critique_id);
+
+
+CREATE TABLE audit
+(
+id int UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+table_name varchar(64) NOT NULL,
+entity_id bigint UNSIGNED NOT NULL,
+operation enum('insert', 'update', 'delete') NOT NULL,
+operator varchar(128) NOT NULL 
+);
+
+
+-- данные отображаемые на странице результатов поиска фильма https://www.kinopoisk.ru/index.php?kp_query=хороший+плохой+злой
+DROP VIEW IF EXISTS v_moview_find_result;
+CREATE VIEW v_moview_find_result
+AS
+SELECT m.rating,
+       CONCAT(m.name, ' ', m.production_year), 
+       CONCAT(m.original_name, ', ', m.duration, ' мин'),
+       CONCAT(c.name, ', реж. ', p.first_name, ' ', p.last_name),
+       CONCAT('(', m.genre, ')'),
+       a.actors
+FROM movies m
+LEFT JOIN (SELECT mc.movie_id, c.name FROM movies_countries mc 
+           JOIN countries c ON c.id = mc.country_id LIMIT 1) c ON c.movie_id = m.id
+LEFT JOIN (SELECT mp.movie_id, p.first_name, p.last_name FROM movies_persons mp 
+           JOIN persons p ON p.id = mp.person_id AND mp.person_status_id = 2 LIMIT 1) p ON p.movie_id = m.id  
+LEFT JOIN (SELECT mp.movie_id, GROUP_CONCAT(CONCAT(p.first_name, ' ', p.last_name) SEPARATOR ', ') actors FROM movies_persons mp 
+           JOIN persons p ON p.id = mp.person_id AND mp.person_status_id = 1 
+           GROUP BY mp.movie_id LIMIT 2) a ON a.movie_id = m.id;  
+           
+          
+-- данные отображаемые во всплывающем окне при наведении мыши на имя участника кинопроизводства на странице детализации фильма          
+DROP VIEW IF EXISTS v_person_popup;
+CREATE VIEW v_person_popup
+AS
+SELECT CONCAT(p.first_name, ' ', p.last_name) 'Имя',
+       p.photo,
+       s.statuses 'Карьера',
+       m.movies 'Участие в фильмах'
+FROM persons p
+JOIN (SELECT mp.person_id, GROUP_CONCAT(DISTINCT ps.status SEPARATOR ', ') statuses FROM movies_persons mp
+     JOIN person_statuses ps ON ps.id = mp.person_id
+     GROUP BY mp.person_id) s ON s.person_id = p.id 
+JOIN (SELECT mp.person_id, GROUP_CONCAT(m.name SEPARATOR ', ') movies FROM movies_persons mp
+      JOIN movies m ON m.id = mp.movie_id
+      GROUP BY mp.person_id) m ON m.person_id = p.id;   
+      
+     
+-- функция подсчёта количества лайков статьи
+delimiter //
+DROP FUNCTION IF EXISTS get_likes_count;//
+CREATE FUNCTION get_likes_count (id INT, positive bool)
+	RETURNS INT NO SQL
+BEGIN
+
+RETURN (SELECT COUNT(*) FROM likes l 
+        WHERE l.critique_id  = id 
+          AND l.positive = positive);
+END//     
+
+-- процедура заносит данные об измнеениях в таблицах в аудит. используется в триггерах
+DROP PROCEDURE IF EXISTS audit;//
+CREATE PROCEDURE audit (IN p_table varchar(64), IN p_entity_id bigint UNSIGNED, IN p_operation enum('insert', 'update', 'delete'))
+BEGIN
+	INSERT INTO audit 
+	(table_name, entity_id, operation, operator)
+	VALUES(p_table, p_entity_id, p_operation, CURRENT_USER()); 
+END//
+
+
+-- аудит вставки новой записи
+CREATE TRIGGER t_movies_insert AFTER INSERT ON movies
+FOR EACH ROW
+BEGIN
+	CALL audit('movies', NEW.id, 'insert');
+END//
+
+
+-- аудит обновления записи 
+CREATE TRIGGER t_movies_update AFTER UPDATE ON movies
+FOR EACH ROW
+BEGIN
+	CALL audit('movies', NEW.id, 'update');
+END//
+
+-- аудит вставки новой записи
+CREATE TRIGGER t_persons_insert AFTER INSERT ON persons
+FOR EACH ROW
+BEGIN
+	CALL audit('persons', NEW.id, 'insert');
+END//
+
+
+-- аудит обновления записи 
+CREATE TRIGGER t_persons_update AFTER UPDATE ON persons
+FOR EACH ROW
+BEGIN
+	CALL audit('persons', NEW.id, 'update');
+END//
+
