@@ -21,79 +21,79 @@ DROP TRIGGER IF EXISTS t_movies_update;
 DROP TRIGGER IF EXISTS t_persons_update;
 DROP TRIGGER IF EXISTS t_persons_update;
 
--- справочник. данные о странах
+-- СЃРїСЂР°РІРѕС‡РЅРёРє. РґР°РЅРЅС‹Рµ Рѕ СЃС‚СЂР°РЅР°С…
 CREATE TABLE countries
 (
 id int UNSIGNED PRIMARY KEY,
-name varchar(128) NOT NULL comment 'Наименование',
-flag BLOB comment 'Иконка флага'-- гифка на кинопоиске весит до 1 КБ
+name varchar(128) NOT NULL comment 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ',
+flag BLOB comment 'РРєРѕРЅРєР° С„Р»Р°РіР°'-- РіРёС„РєР° РЅР° РєРёРЅРѕРїРѕРёСЃРєРµ РІРµСЃРёС‚ РґРѕ 1 РљР‘
 );
 
 
--- справочник. cистема рейтингов американской киноассоциации
+-- СЃРїСЂР°РІРѕС‡РЅРёРє. cРёСЃС‚РµРјР° СЂРµР№С‚РёРЅРіРѕРІ Р°РјРµСЂРёРєР°РЅСЃРєРѕР№ РєРёРЅРѕР°СЃСЃРѕС†РёР°С†РёРё
 CREATE TABLE mpaa_ratings
 (
 id int UNSIGNED PRIMARY KEY, 
-code enum('G', 'PG', 'PG-13', 'R', 'NC-17') NOT NULL comment 'код',
-name varchar(64) NOT NULL comment 'Наименование появляется при наведении мыши',
-description varchar(1000) NOT NULL comment 'Описание'
+code enum('G', 'PG', 'PG-13', 'R', 'NC-17') NOT NULL comment 'РєРѕРґ',
+name varchar(64) NOT NULL comment 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ РїРѕСЏРІР»СЏРµС‚СЃСЏ РїСЂРё РЅР°РІРµРґРµРЅРёРё РјС‹С€Рё',
+description varchar(1000) NOT NULL comment 'РћРїРёСЃР°РЅРёРµ'
 );
 
 
--- справочник. статус участников кинопроизводства
+-- СЃРїСЂР°РІРѕС‡РЅРёРє. СЃС‚Р°С‚СѓСЃ СѓС‡Р°СЃС‚РЅРёРєРѕРІ РєРёРЅРѕРїСЂРѕРёР·РІРѕРґСЃС‚РІР°
 CREATE TABLE person_statuses
 (
 id int UNSIGNED PRIMARY KEY, 
-status varchar(64) NOT NULL comment 'актёр, режиссёр, сценарист и др.' 
+status varchar(64) NOT NULL comment 'Р°РєС‚С‘СЂ, СЂРµР¶РёСЃСЃС‘СЂ, СЃС†РµРЅР°СЂРёСЃС‚ Рё РґСЂ.' 
 );
 
 
--- фильмы
+-- С„РёР»СЊРјС‹
 CREATE TABLE movies
 (
 id bigint UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-rating decimal(4,2) UNSIGNED CONSTRAINT movies_rating_chk CHECK (rating <= 10) comment 'Рейтинг', 
-name varchar(128) NOT NULL comment 'Наименование фильма',
-original_name varchar(128) NOT NULL comment 'Оригинальное наименование фильма', 
-poster MEDIUMBLOB comment 'Постер', -- в полный размер картинка больше 65 КБ 
-production_year year comment 'Год производства',
-genre SET ('Аниме', 'Биографический','Боевик','Вестерн','Военный','Детектив','Детский','Документальный','Драма','Исторический','Комедия', 'Мелодрама','Мистика','Мультфильм','Мюзикл','Научный','Приключения','Триллер','Ужасы', 'Фантастика', 'Фэнтези') comment 'Жанр',
-tagline varchar(128) comment 'Слоган',
-budget int comment 'Бюджет', -- копейки не предусмотрены
-earnings int comment 'Сборы', -- копейки не предусмотрены
-premiere_at date comment 'Премьера',
-dvd_release varchar(128) comment 'Релиз на DVD',
-blue_ray_release varchar(128) comment 'Релиз на Blu-ray',
-age tinyint NOT NULL comment 'Возраст',
-mpaa_rating_id int UNSIGNED NOT NULL comment 'Система рейтингов американской киноассоциации',
-duration int comment 'Время в минутах',
-created_at datetime NOT NULL DEFAULT now() comment 'Дата добавления записи',
-updated_at datetime NOT NULL DEFAULT now() comment 'Дата обновления записи'
+rating decimal(4,2) UNSIGNED CONSTRAINT movies_rating_chk CHECK (rating <= 10) comment 'Р РµР№С‚РёРЅРі', 
+name varchar(128) NOT NULL comment 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ С„РёР»СЊРјР°',
+original_name varchar(128) NOT NULL comment 'РћСЂРёРіРёРЅР°Р»СЊРЅРѕРµ РЅР°РёРјРµРЅРѕРІР°РЅРёРµ С„РёР»СЊРјР°', 
+poster MEDIUMBLOB comment 'РџРѕСЃС‚РµСЂ', -- РІ РїРѕР»РЅС‹Р№ СЂР°Р·РјРµСЂ РєР°СЂС‚РёРЅРєР° Р±РѕР»СЊС€Рµ 65 РљР‘ 
+production_year year comment 'Р“РѕРґ РїСЂРѕРёР·РІРѕРґСЃС‚РІР°',
+genre SET ('РђРЅРёРјРµ', 'Р‘РёРѕРіСЂР°С„РёС‡РµСЃРєРёР№','Р‘РѕРµРІРёРє','Р’РµСЃС‚РµСЂРЅ','Р’РѕРµРЅРЅС‹Р№','Р”РµС‚РµРєС‚РёРІ','Р”РµС‚СЃРєРёР№','Р”РѕРєСѓРјРµРЅС‚Р°Р»СЊРЅС‹Р№','Р”СЂР°РјР°','РСЃС‚РѕСЂРёС‡РµСЃРєРёР№','РљРѕРјРµРґРёСЏ', 'РњРµР»РѕРґСЂР°РјР°','РњРёСЃС‚РёРєР°','РњСѓР»СЊС‚С„РёР»СЊРј','РњСЋР·РёРєР»','РќР°СѓС‡РЅС‹Р№','РџСЂРёРєР»СЋС‡РµРЅРёСЏ','РўСЂРёР»Р»РµСЂ','РЈР¶Р°СЃС‹', 'Р¤Р°РЅС‚Р°СЃС‚РёРєР°', 'Р¤СЌРЅС‚РµР·Рё') comment 'Р–Р°РЅСЂ',
+tagline varchar(128) comment 'РЎР»РѕРіР°РЅ',
+budget int comment 'Р‘СЋРґР¶РµС‚', -- РєРѕРїРµР№РєРё РЅРµ РїСЂРµРґСѓСЃРјРѕС‚СЂРµРЅС‹
+earnings int comment 'РЎР±РѕСЂС‹', -- РєРѕРїРµР№РєРё РЅРµ РїСЂРµРґСѓСЃРјРѕС‚СЂРµРЅС‹
+premiere_at date comment 'РџСЂРµРјСЊРµСЂР°',
+dvd_release varchar(128) comment 'Р РµР»РёР· РЅР° DVD',
+blue_ray_release varchar(128) comment 'Р РµР»РёР· РЅР° Blu-ray',
+age tinyint NOT NULL comment 'Р’РѕР·СЂР°СЃС‚',
+mpaa_rating_id int UNSIGNED NOT NULL comment 'РЎРёСЃС‚РµРјР° СЂРµР№С‚РёРЅРіРѕРІ Р°РјРµСЂРёРєР°РЅСЃРєРѕР№ РєРёРЅРѕР°СЃСЃРѕС†РёР°С†РёРё',
+duration int comment 'Р’СЂРµРјСЏ РІ РјРёРЅСѓС‚Р°С…',
+created_at datetime NOT NULL DEFAULT now() comment 'Р”Р°С‚Р° РґРѕР±Р°РІР»РµРЅРёСЏ Р·Р°РїРёСЃРё',
+updated_at datetime NOT NULL DEFAULT now() comment 'Р”Р°С‚Р° РѕР±РЅРѕРІР»РµРЅРёСЏ Р·Р°РїРёСЃРё'
 );
 
 ALTER TABLE movies ADD CONSTRAINT movies_mpaa_ratings_fk FOREIGN KEY (mpaa_rating_id) REFERENCES mpaa_ratings(id);
 ALTER TABLE movies ADD INDEX movies_name_original_name_ix (name, original_name);
 
 
--- данные участников кинопроизводства
+-- РґР°РЅРЅС‹Рµ СѓС‡Р°СЃС‚РЅРёРєРѕРІ РєРёРЅРѕРїСЂРѕРёР·РІРѕРґСЃС‚РІР°
 CREATE TABLE persons
 (
 id bigint UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-first_name varchar(128) NOT NULL comment 'Имя',
-middle_name varchar(128) comment 'Отчество, второе имя',
-last_name varchar(128) NOT NULL comment 'Фамилия',
-heighth TINYINT UNSIGNED comment 'Рост в см.',
-photo MEDIUMBLOB comment 'Фото',
-birth_date date comment 'Дата рождения',
-birth_place varchar(128) comment 'Место рождения',
-created_at datetime NOT NULL DEFAULT now() comment 'Дата добавления записи',
-updated_at datetime NOT NULL DEFAULT now() comment 'Дата обновления записи'
+first_name varchar(128) NOT NULL comment 'РРјСЏ',
+middle_name varchar(128) comment 'РћС‚С‡РµСЃС‚РІРѕ, РІС‚РѕСЂРѕРµ РёРјСЏ',
+last_name varchar(128) NOT NULL comment 'Р¤Р°РјРёР»РёСЏ',
+heighth TINYINT UNSIGNED comment 'Р РѕСЃС‚ РІ СЃРј.',
+photo MEDIUMBLOB comment 'Р¤РѕС‚Рѕ',
+birth_date date comment 'Р”Р°С‚Р° СЂРѕР¶РґРµРЅРёСЏ',
+birth_place varchar(128) comment 'РњРµСЃС‚Рѕ СЂРѕР¶РґРµРЅРёСЏ',
+created_at datetime NOT NULL DEFAULT now() comment 'Р”Р°С‚Р° РґРѕР±Р°РІР»РµРЅРёСЏ Р·Р°РїРёСЃРё',
+updated_at datetime NOT NULL DEFAULT now() comment 'Р”Р°С‚Р° РѕР±РЅРѕРІР»РµРЅРёСЏ Р·Р°РїРёСЃРё'
 );
 
 ALTER TABLE persons ADD INDEX persons_first_last_middle_ix (first_name, last_name);
 
 
--- movies-persons многие-ко-многим
+-- movies-persons РјРЅРѕРіРёРµ-РєРѕ-РјРЅРѕРіРёРј
 CREATE TABLE movies_persons
 (
 movie_id bigint UNSIGNED NOT NULL,
@@ -107,7 +107,7 @@ ALTER TABLE movies_persons ADD CONSTRAINT movies_persons_person_statuses_fk FORE
 ALTER TABLE movies_persons ADD UNIQUE INDEX movies_persons_uq (movie_id, person_id, person_status_id);
 
 
--- movies-countries многие-ко-многим
+-- movies-countries РјРЅРѕРіРёРµ-РєРѕ-РјРЅРѕРіРёРј
 CREATE TABLE movies_countries
 (
 movie_id bigint UNSIGNED NOT NULL,
@@ -119,14 +119,14 @@ ALTER TABLE movies_countries ADD CONSTRAINT movies_countries_countries_fk FOREIG
 ALTER TABLE movies_countries ADD UNIQUE INDEX movies_countries_uq (movie_id, country_id);
 
 
--- количество зрителей по странам
+-- РєРѕР»РёС‡РµСЃС‚РІРѕ Р·СЂРёС‚РµР»РµР№ РїРѕ СЃС‚СЂР°РЅР°Рј
 CREATE TABLE viewers_by_countries
 (
 movie_id bigint UNSIGNED NOT NULL,
-country_id int UNSIGNED NOT NULL comment 'Страна',
-number_of_viewers int NOT NULL comment 'Количество зрителей',
-created_at datetime NOT NULL DEFAULT now() comment 'Дата добавления записи',
-updated_at datetime NOT NULL DEFAULT now() comment 'Дата обновления записи'
+country_id int UNSIGNED NOT NULL comment 'РЎС‚СЂР°РЅР°',
+number_of_viewers int NOT NULL comment 'РљРѕР»РёС‡РµСЃС‚РІРѕ Р·СЂРёС‚РµР»РµР№',
+created_at datetime NOT NULL DEFAULT now() comment 'Р”Р°С‚Р° РґРѕР±Р°РІР»РµРЅРёСЏ Р·Р°РїРёСЃРё',
+updated_at datetime NOT NULL DEFAULT now() comment 'Р”Р°С‚Р° РѕР±РЅРѕРІР»РµРЅРёСЏ Р·Р°РїРёСЃРё'
 );
 
 ALTER TABLE viewers_by_countries ADD CONSTRAINT viewers_by_countries_movie_fk FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE;
@@ -134,17 +134,17 @@ ALTER TABLE viewers_by_countries ADD CONSTRAINT viewers_by_countries_country_fk 
 ALTER TABLE viewers_by_countries ADD UNIQUE INDEX viewers_by_countries_uq (movie_id, country_id);
 
 
--- данные супругов участников кинопроизводства
+-- РґР°РЅРЅС‹Рµ СЃСѓРїСЂСѓРіРѕРІ СѓС‡Р°СЃС‚РЅРёРєРѕРІ РєРёРЅРѕРїСЂРѕРёР·РІРѕРґСЃС‚РІР°
 DROP TABLE IF EXISTS spouses;
 CREATE TABLE spouses
 (
 person_id bigint UNSIGNED NOT NULL,
-spouse_person_id bigint UNSIGNED NOT NULL comment 'Супруг',
+spouse_person_id bigint UNSIGNED NOT NULL comment 'РЎСѓРїСЂСѓРі',
 status enum('H', 'W'),
-divorce bool comment 'Развод',
-number_of_children TINYINT comment 'Количество детей',
-created_at datetime NOT NULL DEFAULT now() comment 'Дата добавления записи',
-updated_at datetime NOT NULL DEFAULT now() comment 'Дата обновления записи'
+divorce bool comment 'Р Р°Р·РІРѕРґ',
+number_of_children TINYINT comment 'РљРѕР»РёС‡РµСЃС‚РІРѕ РґРµС‚РµР№',
+created_at datetime NOT NULL DEFAULT now() comment 'Р”Р°С‚Р° РґРѕР±Р°РІР»РµРЅРёСЏ Р·Р°РїРёСЃРё',
+updated_at datetime NOT NULL DEFAULT now() comment 'Р”Р°С‚Р° РѕР±РЅРѕРІР»РµРЅРёСЏ Р·Р°РїРёСЃРё'
 );
 
 ALTER TABLE spouses ADD CONSTRAINT spouses_persons_fk FOREIGN KEY (person_id) REFERENCES persons(id) ON DELETE CASCADE;
@@ -152,46 +152,46 @@ ALTER TABLE spouses ADD CONSTRAINT spouses_spouse_persons_fk FOREIGN KEY (spouse
 ALTER TABLE spouses ADD UNIQUE INDEX spouses_uq (person_id, spouse_person_id);
 
 
--- зарегистрированные пользователи
+-- Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»Рё
 CREATE TABLE users
 (
 id int UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-first_name varchar(128) NULL comment 'Имя',
-middle_name varchar(128) comment 'Отчество, второе имя',
-last_name varchar(128) NULL comment 'Фамилия',
-nickname varchar(128) NOT NULL comment 'Погоняло',
-gender enum('М', 'ЖО'),
-avatar blob comment 'картинка',
-created_at datetime NOT NULL DEFAULT now() comment 'Дата добавления записи',
-updated_at datetime NOT NULL DEFAULT now() comment 'Дата обновления записи'
+first_name varchar(128) NULL comment 'РРјСЏ',
+middle_name varchar(128) comment 'РћС‚С‡РµСЃС‚РІРѕ, РІС‚РѕСЂРѕРµ РёРјСЏ',
+last_name varchar(128) NULL comment 'Р¤Р°РјРёР»РёСЏ',
+nickname varchar(128) NOT NULL comment 'РџРѕРіРѕРЅСЏР»Рѕ',
+gender enum('Рњ', 'Р–Рћ'),
+avatar blob comment 'РєР°СЂС‚РёРЅРєР°',
+created_at datetime NOT NULL DEFAULT now() comment 'Р”Р°С‚Р° РґРѕР±Р°РІР»РµРЅРёСЏ Р·Р°РїРёСЃРё',
+updated_at datetime NOT NULL DEFAULT now() comment 'Р”Р°С‚Р° РѕР±РЅРѕРІР»РµРЅРёСЏ Р·Р°РїРёСЃРё'
 );
 
 ALTER TABLE users ADD UNIQUE INDEX users_uq (nickname);
 
 
--- рецензии зрителей на фильм
+-- СЂРµС†РµРЅР·РёРё Р·СЂРёС‚РµР»РµР№ РЅР° С„РёР»СЊРј
 CREATE TABLE critiques
 (
 id bigint UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-name varchar(128) NOT NULL comment 'Заголовок рецензии',
-body text NOT NULL NOT NULL comment 'Текст', -- хватит
-user_id int UNSIGNED NOT NULL NOT NULL comment 'Автор рецензии, зарегистрированный пользователь',
-movie_id bigint UNSIGNED NOT NULL NOT NULL comment 'Объект рецензии',
-assessment TINYINT NOT NULL comment '10 из 10',
-created_at datetime NOT NULL DEFAULT now() comment 'Дата добавления записи',
-updated_at datetime NOT NULL DEFAULT now() comment 'Дата обновления записи'
+name varchar(128) NOT NULL comment 'Р—Р°РіРѕР»РѕРІРѕРє СЂРµС†РµРЅР·РёРё',
+body text NOT NULL NOT NULL comment 'РўРµРєСЃС‚', -- С…РІР°С‚РёС‚
+user_id int UNSIGNED NOT NULL NOT NULL comment 'РђРІС‚РѕСЂ СЂРµС†РµРЅР·РёРё, Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹Р№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ',
+movie_id bigint UNSIGNED NOT NULL NOT NULL comment 'РћР±СЉРµРєС‚ СЂРµС†РµРЅР·РёРё',
+assessment TINYINT NOT NULL comment '10 РёР· 10',
+created_at datetime NOT NULL DEFAULT now() comment 'Р”Р°С‚Р° РґРѕР±Р°РІР»РµРЅРёСЏ Р·Р°РїРёСЃРё',
+updated_at datetime NOT NULL DEFAULT now() comment 'Р”Р°С‚Р° РѕР±РЅРѕРІР»РµРЅРёСЏ Р·Р°РїРёСЃРё'
 );
 
 ALTER TABLE critiques ADD CONSTRAINT critiques_users_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 ALTER TABLE critiques ADD CONSTRAINT critiques_movies_fk FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE;
 ALTER TABLE critiques ADD UNIQUE INDEX critiques_uq (user_id, movie_id);
 
--- оценки рецензий
+-- РѕС†РµРЅРєРё СЂРµС†РµРЅР·РёР№
 CREATE TABLE likes
 (
-positive bool NOT NULL comment 'Палец вверх, палец вниз',
-user_id int UNSIGNED NOT NULL comment 'Кто поставил',
-critique_id bigint UNSIGNED NOT NULL comment 'Рецензия',
+positive bool NOT NULL comment 'РџР°Р»РµС† РІРІРµСЂС…, РїР°Р»РµС† РІРЅРёР·',
+user_id int UNSIGNED NOT NULL comment 'РљС‚Рѕ РїРѕСЃС‚Р°РІРёР»',
+critique_id bigint UNSIGNED NOT NULL comment 'Р РµС†РµРЅР·РёСЏ',
 create_at datetime NOT NULL DEFAULT now()
 );
 
@@ -210,14 +210,14 @@ operator varchar(128) NOT NULL
 );
 
 
--- данные отображаемые на странице результатов поиска фильма https://www.kinopoisk.ru/index.php?kp_query=хороший+плохой+злой
+-- РґР°РЅРЅС‹Рµ РѕС‚РѕР±СЂР°Р¶Р°РµРјС‹Рµ РЅР° СЃС‚СЂР°РЅРёС†Рµ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ РїРѕРёСЃРєР° С„РёР»СЊРјР° https://www.kinopoisk.ru/index.php?kp_query=С…РѕСЂРѕС€РёР№+РїР»РѕС…РѕР№+Р·Р»РѕР№
 DROP VIEW IF EXISTS v_moview_find_result;
 CREATE VIEW v_moview_find_result
 AS
 SELECT m.rating,
        CONCAT(m.name, ' ', m.production_year), 
-       CONCAT(m.original_name, ', ', m.duration, ' мин'),
-       CONCAT(c.name, ', реж. ', p.first_name, ' ', p.last_name),
+       CONCAT(m.original_name, ', ', m.duration, ' РјРёРЅ'),
+       CONCAT(c.name, ', СЂРµР¶. ', p.first_name, ' ', p.last_name),
        CONCAT('(', m.genre, ')'),
        a.actors
 FROM movies m
@@ -230,14 +230,14 @@ LEFT JOIN (SELECT mp.movie_id, GROUP_CONCAT(CONCAT(p.first_name, ' ', p.last_nam
            GROUP BY mp.movie_id LIMIT 2) a ON a.movie_id = m.id;  
            
           
--- данные отображаемые во всплывающем окне при наведении мыши на имя участника кинопроизводства на странице детализации фильма          
+-- РґР°РЅРЅС‹Рµ РѕС‚РѕР±СЂР°Р¶Р°РµРјС‹Рµ РІРѕ РІСЃРїР»С‹РІР°СЋС‰РµРј РѕРєРЅРµ РїСЂРё РЅР°РІРµРґРµРЅРёРё РјС‹С€Рё РЅР° РёРјСЏ СѓС‡Р°СЃС‚РЅРёРєР° РєРёРЅРѕРїСЂРѕРёР·РІРѕРґСЃС‚РІР° РЅР° СЃС‚СЂР°РЅРёС†Рµ РґРµС‚Р°Р»РёР·Р°С†РёРё С„РёР»СЊРјР°          
 DROP VIEW IF EXISTS v_person_popup;
 CREATE VIEW v_person_popup
 AS
-SELECT CONCAT(p.first_name, ' ', p.last_name) 'Имя',
+SELECT CONCAT(p.first_name, ' ', p.last_name) 'РРјСЏ',
        p.photo,
-       s.statuses 'Карьера',
-       m.movies 'Участие в фильмах'
+       s.statuses 'РљР°СЂСЊРµСЂР°',
+       m.movies 'РЈС‡Р°СЃС‚РёРµ РІ С„РёР»СЊРјР°С…'
 FROM persons p
 JOIN (SELECT mp.person_id, GROUP_CONCAT(DISTINCT ps.status SEPARATOR ', ') statuses FROM movies_persons mp
      JOIN person_statuses ps ON ps.id = mp.person_id
@@ -247,7 +247,7 @@ JOIN (SELECT mp.person_id, GROUP_CONCAT(m.name SEPARATOR ', ') movies FROM movie
       GROUP BY mp.person_id) m ON m.person_id = p.id;   
       
      
--- функция подсчёта количества лайков статьи
+-- С„СѓРЅРєС†РёСЏ РїРѕРґСЃС‡С‘С‚Р° РєРѕР»РёС‡РµСЃС‚РІР° Р»Р°Р№РєРѕРІ СЃС‚Р°С‚СЊРё
 delimiter //
 DROP FUNCTION IF EXISTS get_likes_count;//
 CREATE FUNCTION get_likes_count (id INT, positive bool)
@@ -259,7 +259,7 @@ RETURN (SELECT COUNT(*) FROM likes l
           AND l.positive = positive);
 END//     
 
--- процедура заносит данные об измнеениях в таблицах в аудит. используется в триггерах
+-- РїСЂРѕС†РµРґСѓСЂР° Р·Р°РЅРѕСЃРёС‚ РґР°РЅРЅС‹Рµ РѕР± РёР·РјРЅРµРµРЅРёСЏС… РІ С‚Р°Р±Р»РёС†Р°С… РІ Р°СѓРґРёС‚. РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ С‚СЂРёРіРіРµСЂР°С…
 DROP PROCEDURE IF EXISTS audit;//
 CREATE PROCEDURE audit (IN p_table varchar(64), IN p_entity_id bigint UNSIGNED, IN p_operation enum('insert', 'update', 'delete'))
 BEGIN
@@ -269,7 +269,7 @@ BEGIN
 END//
 
 
--- аудит вставки новой записи
+-- Р°СѓРґРёС‚ РІСЃС‚Р°РІРєРё РЅРѕРІРѕР№ Р·Р°РїРёСЃРё
 CREATE TRIGGER t_movies_insert AFTER INSERT ON movies
 FOR EACH ROW
 BEGIN
@@ -277,14 +277,14 @@ BEGIN
 END//
 
 
--- аудит обновления записи 
+-- Р°СѓРґРёС‚ РѕР±РЅРѕРІР»РµРЅРёСЏ Р·Р°РїРёСЃРё 
 CREATE TRIGGER t_movies_update AFTER UPDATE ON movies
 FOR EACH ROW
 BEGIN
 	CALL audit('movies', NEW.id, 'update');
 END//
 
--- аудит вставки новой записи
+-- Р°СѓРґРёС‚ РІСЃС‚Р°РІРєРё РЅРѕРІРѕР№ Р·Р°РїРёСЃРё
 CREATE TRIGGER t_persons_insert AFTER INSERT ON persons
 FOR EACH ROW
 BEGIN
@@ -292,7 +292,7 @@ BEGIN
 END//
 
 
--- аудит обновления записи 
+-- Р°СѓРґРёС‚ РѕР±РЅРѕРІР»РµРЅРёСЏ Р·Р°РїРёСЃРё 
 CREATE TRIGGER t_persons_update AFTER UPDATE ON persons
 FOR EACH ROW
 BEGIN
