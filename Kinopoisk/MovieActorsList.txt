@@ -1,0 +1,8 @@
+USE Kinopoisk;
+
+-- список актёров занятых в данном фильме. отображается на странице детализации фильма справа в виде ссылок
+SELECT CONCAT('https://www.kinopoisk.ru/name/', p.id) 'Ссылка', 
+       CONCAT(p.first_name, p.last_name) 'ФИО' 
+FROM persons p
+JOIN movies_persons mp ON mp.person_id  = p.id AND mp.person_status_id  = 1-- только актёры
+WHERE mp.movie_id = 1;-- id фильма
